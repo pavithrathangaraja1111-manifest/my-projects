@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+{% block content %}
+<h2 >Create New Fixed Deposit</h2>
+<div class="row">
+    <div class="col-md-8">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <form method="POST">
+                    {{ form.hidden_tag() }}
+                    
+                    <h5 style="color: white;" >Customer Details</h5><br>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            {{ form.customer_name.label(class="form-label") }}
+                            {{ form.customer_name(class="form-control") }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            {{ form.customer_id.label(class="form-label") }}
+                            {{ form.customer_id(class="form-control") }}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            {{ form.id_type.label(class="form-label") }}
+                            {{ form.id_type(class="form-select") }}
+                        </div>
+                        <div class="col-md-8 mb-3">
+                            {{ form.id_number.label(class="form-label") }}
+                            {{ form.id_number(class="form-control") }}
+                        </div>
+                    </div>
+
+                    <h5 style="color: white;">Deposit Details</h5><br>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            {{ form.principal.label(class="form-label") }}
+                            {{ form.principal(class="form-control", placeholder="e.g. 10000", id="principal") }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            {{ form.tenure_months.label(class="form-label") }}
+                            {{ form.tenure_months(class="form-control", placeholder="e.g. 12", id="tenure") }}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            {{ form.interest_rate.label(class="form-label") }}
+                            {{ form.interest_rate(class="form-control", placeholder="e.g. 5.5", id="rate") }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            {{ form.start_date.label(class="form-label") }}
+                            {{ form.start_date(class="form-control", id="start_date") }}
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-success w-100 mt-3">Create Fixed Deposit</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card bg-light">
+            <div class="card-header"><h5 style="color: black;">Calculation Preview</h5></div>
+            <div class="card-body">
+                <p style="color: black;"><strong>Interest Type:</strong> <span id="int_type">{{ config.interest_type if config else 'Simple' }}</span></p>
+                <p style="color: black;"><strong>Maturity Date:</strong> <span id="mat_date">-</span></p>
+                <p style="color: black;"><strong>Est. Maturity Amount:</strong> <br><strong class="text-success fs-4" id="mat_amt">$0.00</strong></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Simple client-side preview logic
+    const pInput = document.getElementById('principal');
+    const rInput = document.getElementById('rate');
+    const tInput = document.getElementById('tenure');
+    const sdInput = document.getElementById('start_date');
+    
+    function updatePreview() {
+        const p = parseFloat(pInput.value) || 0;
+        const r = parseFloat(rInput.value) || 0;
+        const t = parseInt(tInput.value) || 0;
+        const type = document.getElementById('int_type').innerText.toLowerCase();
+        
+        // Date calc
+        let dVal = sdInput.value;
+        if(dVal) {
+            let d = new Date(dVal);
+            d.setMonth(d.getMonth() + t);
+            document.getElementById('mat_date').innerText = d.toISOString().split('T')[0];
+        } else {
+            document.getElementById('mat_date').innerText = '-';
+        }
+        
+        // Interest Calc
+        let years = t / 12;
+        let amt = 0;
+        if (type === 'simple') {
+            amt = p * (1 + (r/100) * years);
+        } else {
+            amt = p * Math.pow((1 + (r/100)), years);
+        }
+        
+        document.getElementById('mat_amt').innerText = '$' + amt.toFixed(2);
+    }
+    
+    [pInput, rInput, tInput, sdInput].forEach(el => el.addEventListener('input', updatePreview));
+    updatePreview();
+</script>
+{% endblock %}

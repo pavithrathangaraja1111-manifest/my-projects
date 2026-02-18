@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Fixed Deposit Register</h2>
+<br>
+
+<form method="GET" class="row g-3 mb-4 bg-white p-3 rounded shadow-sm">
+    <div class="col-md-3">
+        <label style="color: black;">Status</label>
+        <select name="status" class="form-select">
+            <option value="all" {% if status_filter == 'all' %}selected{% endif %}>All</option>
+            <option value="active" {% if status_filter == 'active' %}selected{% endif %}>Active</option>
+            <option value="closed" {% if status_filter == 'closed' %}selected{% endif %}>Closed</option>
+        </select>
+    </div>
+    <div class="col-md-3">
+        <label style="color: black;">Customer Name</label>
+        <input type="text" name="customer" value="{{ customer_search }}" class="form-control" placeholder="Search...">
+    </div>
+    <div class="col-md-2">
+        <label style="color: black;">From</label>
+        <input type="date" name="from" value="{{ date_from }}" class="form-control">
+    </div>
+    <div class="col-md-2">
+        <label style="color: black;">To</label>
+        <input type="date" name="to" value="{{ date_to }}" class="form-control">
+    </div>
+    <div class="col-md-2 align-self-end">
+        <button type="submit" class="btn btn-secondary w-100">Filter</button>
+    </div>
+</form>
+
+<div class="table-responsive bg-white shadow-sm rounded">
+    <table class="table table-hover mb-0">
+        <thead class="table-light">
+            <tr>
+                <th>FD No.</th>
+                <th>Customer</th>
+                <th>Start Date</th>
+                <th>Tenure</th>
+                <th>Rate</th>
+                <th>Maturity Date</th>
+                <th>Mat. Amount</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for fd in fds %}
+            <tr>
+                <td>{{ fd.fd_number }}</td>
+                <td>{{ fd.customer_name }} <small class="d-block text-muted">{{ fd.customer_id }}</small></td>
+                <td>{{ fd.start_date }}</td>
+                <td>{{ fd.tenure_months }} M</td>
+                <td>{{ fd.interest_rate }}%</td>
+                <td>{{ fd.maturity_date }}</td>
+                <td>${{ "{:,.2f}".format(fd.maturity_amount) }}</td>
+                <td>
+                    {% if fd.status == 'active' %}
+                        <span class="badge bg-success">Active</span>
+                    {% else %}
+                        <span class="badge bg-secondary">Closed</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="{{ url_for('download_receipt', fd_id=fd.id) }}" class="btn btn-sm btn-outline-primary">PDF</a>
+                    {% if fd.status == 'active' %}
+                        <a href="{{ url_for('premature_close_fd', fd_id=fd.id) }}" class="btn btn-sm btn-outline-danger">Close</a>
+                    {% endif %}
+                </td>
+            </tr>
+            {% else %}
+            <tr><td colspan="9" class="text-center py-4">No Fixed Deposits found.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

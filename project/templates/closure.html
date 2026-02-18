@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Premature Closure: {{ fd.fd_number }}</h2>
+<p class="text-muted">Customer: {{ fd.customer_name }} | Principal: ${{ fd.principal }}</p>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <form method="POST">
+                    {{ form.hidden_tag() }}
+                    <div class="mb-3">
+                        {{ form.closure_date.label(class="form-label") }}
+                        {{ form.closure_date(class="form-control") }}
+                    </div>
+                    <button type="submit" name="simulate" value="simulate" class="btn btn-secondary">Simulate</button>
+                    {% if simulation %}
+                        <button type="submit" name="confirm" value="confirm" class="btn btn-danger" onclick="return confirm('Are you sure you want to close this FD? This cannot be undone.');">Confirm Closure</button>
+                    {% endif %}
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        {% if simulation %}
+        <div class="card bg-light">
+            <div class="card-header">Simulation Results</div>
+            <div class="card-body">
+                <table class="table table-borderless">
+                    <tr>
+                        <td>Principal:</td>
+                        <td class="text-end">${{ simulation.principal }}</td>
+                    </tr>
+                    <tr>
+                        <td>Accrued Interest:</td>
+                        <td class="text-end">${{ simulation.accrued_interest }}</td>
+                    </tr>
+                    <tr class="text-danger">
+                        <td>Penalty Deduction:</td>
+                        <td class="text-end">- ${{ simulation.penalty_amount }}</td>
+                    </tr>
+                    <tr class="table-primary">
+                        <th>Total Payable:</th>
+                        <th class="text-end">${{ simulation.payable_amount }}</th>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        {% else %}
+        <div class="alert alert-info">
+            Select a closure date and click "Simulate" to see the payout amount.
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
